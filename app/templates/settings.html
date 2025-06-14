@@ -1,0 +1,56 @@
+{% extends "layout.html" %}
+{% block content %}
+
+    <h2>Settings</h2>
+    <form method="POST" action="{{ url_for('main.settings') }}" autocomplete="off">
+        {{ form.hidden_tag() }}
+
+        <label for="gpa_scale">GPA Scale:</label>
+        {{ form.gpa_scale(class="form-select") }}
+
+        <label for="grade_format">Grade Format:</label>
+        {{ form.grade_format(class="form-select") }}
+
+        <div id="custom-gpa-fields" {% if form.gpa_scale.data != 'custom' %}style="display:none" {% endif %}>
+            <h4>Custom GPA Values</h4>
+            {{ form.a_plus.label }} {{ form.a_plus(size=5, class="form-control d-inline w-auto") }}<br>
+            {{ form.a.label }} {{ form.a(size=5, class="form-control d-inline w-auto") }}<br>
+            {{ form.a_minus.label }} {{ form.a_minus(size=5, class="form-control d-inline w-auto") }}<br>
+            {{ form.b_plus.label }} {{ form.b_plus(size=5, class="form-control d-inline w-auto") }}<br>
+            {{ form.b.label }} {{ form.b(size=5, class="form-control d-inline w-auto") }}<br>
+            {{ form.b_minus.label }} {{ form.b_minus(size=5, class="form-control d-inline w-auto") }}<br>
+            {{ form.c_plus.label }} {{ form.c_plus(size=5, class="form-control d-inline w-auto") }}<br>
+            {{ form.c.label }} {{ form.c(size=5, class="form-control d-inline w-auto") }}<br>
+            {{ form.c_minus.label }} {{ form.c_minus(size=5, class="form-control d-inline w-auto") }}<br>
+            {{ form.d_plus.label }} {{ form.d_plus(size=5, class="form-control d-inline w-auto") }}<br>
+            {{ form.d.label }} {{ form.d(size=5, class="form-control d-inline w-auto") }}<br>
+            {{ form.d_minus.label }} {{ form.d_minus(size=5, class="form-control d-inline w-auto") }}<br>
+            {{ form.f.label }} {{ form.f(size=5, class="form-control d-inline w-auto") }}<br>
+
+            <h4>Course Weights</h4>
+            {{ form.weight_regular.label }} {{ form.weight_regular(size=5, class="form-control d-inline w-auto") }}<br>
+            {{ form.weight_honors.label }} {{ form.weight_honors(size=5, class="form-control d-inline w-auto") }}<br>
+            {{ form.weight_ap.label }} {{ form.weight_ap(size=5, class="form-control d-inline w-auto") }}<br>
+            {{ form.weight_ib.label }} {{ form.weight_ib(size=5, class="form-control d-inline w-auto") }}<br>
+            {{ form.weight_de.label }} {{ form.weight_de(size=5, class="form-control d-inline w-auto") }}<br>
+
+            <h4>GPA Cap (optional)</h4>
+            {{ form.gpa_cap.label }} {{ form.gpa_cap(size=5, class="form-control d-inline w-auto") }}
+        </div>
+
+        <button type="submit" class="btn btn-primary mt-3">Save Settings</button>
+    </form>
+
+    <script>
+        const gpaScaleSelect = document.querySelector('select[name="gpa_scale"]');
+        const customFields = document.getElementById('custom-gpa-fields');
+
+        gpaScaleSelect.addEventListener('change', () => {
+            if (gpaScaleSelect.value === 'custom') {
+                customFields.style.display = 'block';
+            } else {
+                customFields.style.display = 'none';
+            }
+        });
+    </script>
+{% endblock %}

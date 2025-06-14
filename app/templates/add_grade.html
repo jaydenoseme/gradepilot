@@ -1,0 +1,145 @@
+{% extends 'layout.html' %}
+{% block content %}
+    <div class="form-container">
+        <h2>Add Grade</h2>
+        <form method="POST" action="{{ url_for('main.add_grade') }}" autocomplete="off">
+            {{ form.hidden_tag() }}
+
+            <div class="form-group">
+                {{ form.subject.label }}
+                {{ form.subject(class="form-control") }}
+                {% if form.subject.errors %}
+                    <div class="error text-danger">{{ form.subject.errors[0] }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                {{ form.grade_type.label }}
+                {{ form.grade_type(class="form-control", id="grade_type") }}
+                {% if form.grade_type.errors %}
+                    <div class="error text-danger">{{ form.grade_type.errors[0] }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                {{ form.course_type.label }}
+                {{ form.course_type(class="form-control") }}
+                {% if form.course_type.errors %}
+                    <div class="error text-danger">{{ form.course_type.errors[0] }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group field-grade" style="display: none;">
+                {{ form.grade.label }}
+                {{ form.grade(class="form-control") }}
+                {% if form.grade.errors %}
+                    <div class="error text-danger">{{ form.grade.errors[0] }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group field-letter" style="display: none;">
+                {{ form.letter.label }}
+                {{ form.letter(class="form-control") }}
+                {% if form.letter.errors %}
+                    <div class="error text-danger">{{ form.letter.errors[0] }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                {{ form.date.label }}
+                {{ form.date(class="form-control") }}
+                {% if form.date.errors %}
+                    <div class="error text-danger">{{ form.date.errors[0] }}</div>
+                {% endif %}
+            </div>
+
+            <button type="submit" class="btn btn-primary">{{ form.submit.label.text }}</button>
+        </form>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const gradeTypeSelect = document.querySelector('#grade_type');
+            const numericField = document.querySelector('.field-grade');
+            const letterField = document.querySelector('.field-letter');
+
+            function toggleFields() {
+                if (gradeTypeSelect.value === 'letter') {
+                    letterField.style.display = 'block';
+                    numericField.style.display = 'none';
+                } else {
+                    letterField.style.display = 'none';
+                    numericField.style.display = 'block';
+                }
+            }
+
+            gradeTypeSelect.addEventListener('change', toggleFields);
+            toggleFields(); // run on page load
+        });
+    </script>
+
+    <style>
+        .form-container {
+            max-width: 480px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: #fff;
+            border-radius: 14px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        h2 {
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+            color: #1C1C1E;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.4rem;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            font-size: 1rem;
+            border: 1.5px solid #ccc;
+            border-radius: 8px;
+            transition: border-color 0.2s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #007AFF;
+            box-shadow: 0 0 6px rgba(0, 122, 255, 0.3);
+        }
+
+        .btn-primary {
+            background-color: #007AFF;
+            border: none;
+            padding: 0.65rem 1.25rem;
+            color: white;
+            font-weight: 600;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.25s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: #0051cc;
+        }
+
+        .error {
+            margin-top: 0.25rem;
+            font-size: 0.875rem;
+            color: #d9534f;
+        }
+    </style>
+{% endblock %}
