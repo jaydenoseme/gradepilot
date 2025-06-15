@@ -1,43 +1,43 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
-        <loc>https://gradepilot.onrender.com/</loc>
+        <loc>/</loc>
         <lastmod>2024-03-19</lastmod>
         <changefreq>daily</changefreq>
         <priority>1.0</priority>
     </url>
     <url>
-        <loc>https://gradepilot.onrender.com/add</loc>
+        <loc>/add</loc>
         <lastmod>2024-03-19</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.9</priority>
     </url>
     <url>
-        <loc>https://gradepilot.onrender.com/trends</loc>
+        <loc>/trends</loc>
         <lastmod>2024-03-19</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
-        <loc>https://gradepilot.onrender.com/semesters</loc>
+        <loc>/semesters</loc>
         <lastmod>2024-03-19</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
-        <loc>https://gradepilot.onrender.com/settings</loc>
+        <loc>/settings</loc>
         <lastmod>2024-03-19</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
     </url>
     <url>
-        <loc>https://gradepilot.onrender.com/login</loc>
+        <loc>/login</loc>
         <lastmod>2024-03-19</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.6</priority>
     </url>
     <url>
-        <loc>https://gradepilot.onrender.com/signup</loc>
+        <loc>/signup</loc>
         <lastmod>2024-03-19</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.6</priority>
