@@ -1,0 +1,113 @@
+{% extends 'layout.html' %}
+{% block content %}
+    <div class="form-container">
+        <h2>Add Semester</h2>
+        <form method="POST" action="{{ url_for('main.add_semester') }}" autocomplete="off">
+            {{ form.hidden_tag() }}
+
+            <div class="form-group">
+                {{ form.name.label }}
+                {{ form.name(class="form-control") }}
+                {% if form.name.errors %}
+                    <div class="error text-danger">{{ form.name.errors[0] }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                {{ form.start_date.label }}
+                {{ form.start_date(class="form-control", type="date") }}
+                {% if form.start_date.errors %}
+                    <div class="error text-danger">{{ form.start_date.errors[0] }}</div>
+                {% endif %}
+            </div>
+
+            <button type="submit" class="btn btn-primary">{{ form.submit.label.text }}</button>
+            <a href="{{ url_for('main.index') }}" class="btn btn-secondary">Cancel</a>
+        </form>
+    </div>
+
+    <style>
+        .form-container {
+            max-width: 480px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: #fff;
+            border-radius: 14px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        h2 {
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+            color: #1C1C1E;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.4rem;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            font-size: 1rem;
+            border: 1.5px solid #ccc;
+            border-radius: 8px;
+            transition: border-color 0.2s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #007AFF;
+            box-shadow: 0 0 6px rgba(0, 122, 255, 0.3);
+        }
+
+        .btn-primary {
+            background-color: #007AFF;
+            border: none;
+            padding: 0.65rem 1.25rem;
+            color: white;
+            font-weight: 600;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.25s ease;
+            margin-right: 0.5rem;
+        }
+
+        .btn-primary:hover {
+            background-color: #0051cc;
+        }
+
+        .btn-secondary {
+            background-color: #6c757d;
+            border: none;
+            padding: 0.65rem 1.25rem;
+            color: white;
+            font-weight: 600;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.25s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-secondary:hover {
+            background-color: #5a6268;
+            text-decoration: none;
+            color: white;
+        }
+
+        .error {
+            margin-top: 0.25rem;
+            font-size: 0.875rem;
+            color: #d9534f;
+        }
+    </style>
+{% endblock %}

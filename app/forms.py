@@ -1,48 +1,44 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, DecimalField, SelectField, DateField, FloatField
+from wtforms import StringField, PasswordField, SubmitField, DecimalField, SelectField, DateField, FloatField, IntegerField, BooleanField
 from wtforms.validators import DataRequired, Length, EqualTo, ValidationError, NumberRange, Optional
 from app.models import User
 
 class GradeForm(FlaskForm):
     subject = StringField('Subject', validators=[DataRequired()])
-    grade_type = SelectField('Grade Type', choices=[('number', 'Number'), ('letter', 'Letter')], default='number')
-
-    grade = DecimalField('Grade (0-100)', validators=[Optional(), NumberRange(min=0, max=100)])
-    letter = SelectField(
-        'Letter Grade',
-        choices=[('', 'Select')] + [(g, g) for g in ['A+', 'A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D', 'F']],
-        validators=[Optional()]
-    )
-
-    # ✅ Updated course_type with all possible options
-    course_type = SelectField(
-        'Course Type',
-        choices=[
-            ('Regular', 'Regular'),
-            ('Honors', 'Honors'),
-            ('AP', 'AP'),
-            ('IB', 'IB'),
-            ('DE', 'DE')
-        ],
-        default='Regular'
-    )
-
+    grade_type = SelectField('Grade Type', choices=[('number', 'Numeric'), ('letter', 'Letter')], validators=[DataRequired()])
+    grade = FloatField('Grade', validators=[Optional()])
+    letter = SelectField('Letter Grade', choices=[
+        ('A+', 'A+'), ('A', 'A'), ('A-', 'A-'),
+        ('B+', 'B+'), ('B', 'B'), ('B-', 'B-'),
+        ('C+', 'C+'), ('C', 'C'), ('C-', 'C-'),
+        ('D+', 'D+'), ('D', 'D'), ('D-', 'D-'),
+        ('F', 'F')
+    ], validators=[Optional()])
+    course_type = SelectField('Course Type', choices=[
+        ('Regular', 'Regular'),
+        ('Honors', 'Honors'),
+        ('AP', 'AP'),
+        ('IB', 'IB'),
+        ('DE', 'Dual Enrollment')
+    ], validators=[Optional()])
+    semester_id = SelectField('Semester', coerce=int, validators=[Optional()], choices=[('', 'No Semester')])
     date = DateField('Date', format='%Y-%m-%d', validators=[Optional()])
-    submit = SubmitField('Add Grade')
+    credit_hours = FloatField('Credit Hours', default=1.0)
+    submit = SubmitField('Submit')
 
     def validate(self, extra_validators=None):
         if not super().validate(extra_validators=extra_validators):
             return False
-
+        
         if self.grade_type.data == 'number':
-            if self.grade.data is None:
-                self.grade.errors.append("Numeric grade is required.")
+            if not self.grade.data:
+                self.grade.errors.append('Numeric grade is required')
                 return False
-        elif self.grade_type.data == 'letter':
-            if not self.letter.data or self.letter.data not in dict(self.letter.choices):
-                self.letter.errors.append("Valid letter grade is required.")
+        else:
+            if not self.letter.data:
+                self.letter.errors.append('Letter grade is required')
                 return False
-
+        
         return True
 
 class DeleteForm(FlaskForm):
@@ -107,6 +103,7 @@ class SettingsForm(FlaskForm):
     # Optional GPA cap
     gpa_cap = FloatField('GPA Cap (Optional)', default=None, validators=[Optional()])
 
+    use_credit_hours = BooleanField('Use Credit Hours for GPA Calculation')
 
     # Custom GPA values
     a_plus = FloatField('A+ GPA', default=4.0)
@@ -134,3 +131,8 @@ class SettingsForm(FlaskForm):
 
 
     submit = SubmitField('Save Settings')
+
+class SemesterForm(FlaskForm):
+    name = StringField('Semester Name (e.g., Fall 2024)', validators=[DataRequired()])
+    start_date = DateField('Start Date', format='%Y-%m-%d', validators=[DataRequired()])
+    submit = SubmitField('Save Semester')

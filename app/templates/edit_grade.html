@@ -22,12 +22,17 @@
             </div>
 
             <div class="form-group">
-                {{ form.course_type.label }}
-                {{ form.course_type(class="form-control") }}
-                {% if form.course_type.errors %}
-                    <div class="error text-danger">{{ form.course_type.errors[0] }}</div>
-                {% endif %}
+                {{ form.course_type.label(class="form-label") }}
+                {{ form.course_type(class="form-select") }}
             </div>
+
+            {% if current_user.use_credit_hours %}
+            <div class="form-group">
+                {{ form.credit_hours.label(class="form-label") }}
+                {{ form.credit_hours(class="form-control", type="number", step="0.5", min="0.5", max="6") }}
+                <small class="form-text text-muted">Enter the number of credit hours for this course (0.5-6)</small>
+            </div>
+            {% endif %}
 
             <div class="form-group field-grade" style="display: none;">
                 {{ form.grade.label }}
@@ -46,16 +51,23 @@
             </div>
 
             <div class="form-group">
+                {{ form.semester_id.label }}
+                {{ form.semester_id(class="form-control", id="semester_id") }}
+                {% if form.semester_id.errors %}
+                    <div class="error text-danger">{{ form.semester_id.errors[0] }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group field-date">
                 {{ form.date.label }}
-                {{ form.date(class="form-control") }}
+                {{ form.date(class="form-control", type="date", id="date_field") }}
                 {% if form.date.errors %}
                     <div class="error text-danger">{{ form.date.errors[0] }}</div>
                 {% endif %}
             </div>
 
-            <div class="form-group">
-                <button type="submit" class="btn btn-primary">{{ form.submit.label.text }}</button>
-            </div>
+            <button type="submit" class="btn btn-primary">{{ form.submit.label.text }}</button>
+            <a href="{{ url_for('main.index') }}" class="btn btn-secondary">Cancel</a>
         </form>
     </div>
 
@@ -64,6 +76,9 @@
             const gradeTypeSelect = document.querySelector('#grade_type');
             const numericField = document.querySelector('.field-grade');
             const letterField = document.querySelector('.field-letter');
+            const semesterSelect = document.querySelector('#semester_id');
+            const dateField = document.querySelector('.field-date');
+            const dateInput = document.querySelector('#date_field');
 
             function toggleFields() {
                 if (gradeTypeSelect.value === 'letter') {
@@ -75,8 +90,22 @@
                 }
             }
 
+            function toggleDateField() {
+                if (semesterSelect.value === '0') {
+                    dateField.style.display = 'block';
+                    dateInput.required = true;
+                } else {
+                    dateField.style.display = 'none';
+                    dateInput.required = false;
+                }
+            }
+
             gradeTypeSelect.addEventListener('change', toggleFields);
-            toggleFields(); // run on page load
+            semesterSelect.addEventListener('change', toggleDateField);
+            
+            // Initialize fields on page load
+            toggleFields();
+            toggleDateField();
         });
     </script>
 
@@ -132,10 +161,30 @@
             border-radius: 10px;
             cursor: pointer;
             transition: background-color 0.25s ease;
+            margin-right: 0.5rem;
         }
 
         .btn-primary:hover {
             background-color: #0051cc;
+        }
+
+        .btn-secondary {
+            background-color: #6c757d;
+            border: none;
+            padding: 0.65rem 1.25rem;
+            color: white;
+            font-weight: 600;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.25s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-secondary:hover {
+            background-color: #5a6268;
+            text-decoration: none;
+            color: white;
         }
 
         .error {

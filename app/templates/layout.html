@@ -45,11 +45,89 @@
         .tooltip-hover-wrapper:hover .tooltip-hover-msg {
             display: block;
         }
+
+        .nav-btn {
+            padding: 0.375rem 0.75rem;
+            font-size: 1rem;
+            line-height: 1.5;
+            border-radius: 0.25rem;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+            vertical-align: middle;
+            cursor: pointer;
+            transition: all 0.15s ease-in-out;
+            margin: 0 0.25rem;
+        }
+
+        .nav-btn-primary {
+            color: #fff;
+            background-color: #0d6efd;
+            border: 1px solid #0d6efd;
+        }
+
+        .nav-btn-primary:hover {
+            background-color: #0b5ed7;
+            border-color: #0a58ca;
+        }
+
+        .nav-btn-outline {
+            color: #0d6efd;
+            background-color: transparent;
+            border: 1px solid #0d6efd;
+        }
+
+        .nav-btn-outline:hover {
+            color: #fff;
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+        }
+
+        .nav-btn-danger {
+            color: #fff;
+            background-color: #dc3545;
+            border: 1px solid #dc3545;
+        }
+
+        .nav-btn-danger:hover {
+            background-color: #bb2d3b;
+            border-color: #b02a37;
+        }
+
+        /* Ensure navigation links are clickable */
+        .navbar-nav .nav-link {
+            cursor: pointer;
+            position: relative;
+            z-index: 1000;
+        }
+
+        /* Ensure buttons are clickable */
+        .btn {
+            position: relative;
+            z-index: 1000;
+        }
+
+        /* Navbar scroll behavior */
+        .navbar {
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .navbar.navbar-hidden {
+            transform: translateY(-100%);
+        }
+
+        .navbar.navbar-visible {
+            transform: translateY(0);
+        }
     </style>
 </head>
 
 <body>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top">
+    <div class="alert alert-info text-center mb-0" role="alert" style="border-radius:0;">
+        <strong>Beta Notice:</strong> GradePilot is currently in beta. The <b>Simulate</b>, <b>Export</b>, and <b>Profile</b> features are in progress and may not be fully functional yet.
+    </div>
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top navbar-visible">
         <div class="container">
             <a class="navbar-brand" href="{{ url_for('main.index') }}">GradePilot</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
@@ -58,10 +136,11 @@
             </button>
 
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
+                <ul class="navbar-nav ms-auto align-items-center">
                     <li class="nav-item"><a class="nav-link" href="{{ url_for('main.index') }}">Home</a></li>
                     <li class="nav-item"><a class="nav-link" href="{{ url_for('main.add_grade') }}">Add Grades</a></li>
                     <li class="nav-item"><a class="nav-link" href="{{ url_for('main.trends') }}">GPA Trends</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('main.semesters') }}">Semesters</a></li>
 
                     <li class="nav-item">
                         <div class="tooltip-hover-wrapper">
@@ -76,23 +155,28 @@
                     </li>
 
                     {% if current_user.is_authenticated %}
+                        {% if current_user.username == "jaydenokoeguale" %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('main.admin_dashboard') }}">Admin</a>
+                        </li>
+                        {% endif %}
                         <li class="nav-item">
                             <div class="tooltip-hover-wrapper">
                                 <a class="nav-link disabled-nav-link" href="#">Profile</a>
                             </div>
                         </li>
                         <li class="nav-item">
-                            <a class="btn btn-danger ms-2" href="{{ url_for('main.logout') }}">Logout</a>
+                            <a class="nav-btn nav-btn-danger" href="{{ url_for('main.logout') }}">Logout</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('main.settings') }}">Settings</a>
                         </li>
                     {% else %}
                         <li class="nav-item">
-                            <a class="btn btn-outline-primary me-2" href="{{ url_for('main.login') }}">Login</a>
+                            <a class="nav-btn nav-btn-outline" href="{{ url_for('main.login') }}">Login</a>
                         </li>
                         <li class="nav-item">
-                            <a class="btn btn-primary" href="{{ url_for('main.signup') }}">Sign Up</a>
+                            <a class="nav-btn nav-btn-primary" href="{{ url_for('main.signup') }}">Sign Up</a>
                         </li>
                     {% endif %}
                 </ul>
@@ -126,19 +210,58 @@
     <!-- Bootstrap Bundle JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!-- Optional: Smooth scroll on input focus -->
+    <!-- Initialize Bootstrap components -->
     <script>
-        document.querySelectorAll('input, select, textarea').forEach(el => {
-            el.addEventListener('focus', () => {
-                setTimeout(() => {
-                    el.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'center'
-                    });
-                }, 300);
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize all tooltips
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+
+            // Initialize all popovers
+            var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
+            var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
+                return new bootstrap.Popover(popoverTriggerEl);
+            });
+
+            // Initialize navbar collapse
+            var navbarToggler = document.querySelector('.navbar-toggler');
+            var navbarCollapse = document.querySelector('.navbar-collapse');
+            if (navbarToggler && navbarCollapse) {
+                navbarToggler.addEventListener('click', function() {
+                    navbarCollapse.classList.toggle('show');
+                });
+            }
+
+            // Navbar scroll behavior
+            let lastScrollTop = 0;
+            const navbar = document.querySelector('.navbar');
+            const scrollThreshold = 50; // Minimum scroll amount before hiding/showing navbar
+
+            window.addEventListener('scroll', function() {
+                const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                const scrollDelta = scrollTop - lastScrollTop;
+
+                if (Math.abs(scrollDelta) < scrollThreshold) {
+                    return; // Ignore small scroll amounts
+                }
+
+                if (scrollDelta > 0 && scrollTop > 100) {
+                    // Scrolling down
+                    navbar.classList.remove('navbar-visible');
+                    navbar.classList.add('navbar-hidden');
+                } else {
+                    // Scrolling up
+                    navbar.classList.remove('navbar-hidden');
+                    navbar.classList.add('navbar-visible');
+                }
+
+                lastScrollTop = scrollTop;
             });
         });
     </script>
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </body>
 

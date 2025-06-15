@@ -5,11 +5,36 @@
     <form method="POST" action="{{ url_for('main.settings') }}" autocomplete="off">
         {{ form.hidden_tag() }}
 
-        <label for="gpa_scale">GPA Scale:</label>
-        {{ form.gpa_scale(class="form-select") }}
-
-        <label for="grade_format">Grade Format:</label>
-        {{ form.grade_format(class="form-select") }}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h4>GPA Settings</h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            {{ form.gpa_scale.label(class="form-label") }}
+                            {{ form.gpa_scale(class="form-select") }}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            {{ form.grade_format.label(class="form-label") }}
+                            {{ form.grade_format(class="form-select") }}
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group mb-3">
+                    <div class="form-check">
+                        {{ form.use_credit_hours(class="form-check-input") }}
+                        {{ form.use_credit_hours.label(class="form-check-label") }}
+                    </div>
+                    <small class="form-text text-muted">
+                        When enabled, GPA will be calculated using credit hours. Each grade will be weighted by its credit hours.
+                    </small>
+                </div>
+            </div>
+        </div>
 
         <div id="custom-gpa-fields" {% if form.gpa_scale.data != 'custom' %}style="display:none" {% endif %}>
             <h4>Custom GPA Values</h4>
@@ -53,4 +78,15 @@
             }
         });
     </script>
+
+    <style>
+        .form-check-input:checked {
+            background-color: #0a1f44;
+            border-color: #0a1f44;
+        }
+        .form-text {
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+    </style>
 {% endblock %}

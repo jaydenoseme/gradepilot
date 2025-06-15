@@ -2,7 +2,7 @@
 
 {% block content %}
 
-    {% set scale_names = {
+{% set scale_names = {
     'standard_4': 'Standard 4.0',
     'honors': 'Honors (+0.5)',
     'ap_ib': 'AP/IB (+1.0)',
@@ -13,203 +13,303 @@
     'college_4': 'College 4.0 (Variants)',
     'college_plus_minus': 'College Plus/Minus',
     'percentage': 'Percentage'
-    } %}
+} %}
 
-    {% set format_names = {
+{% set format_names = {
     'simple': 'Simple',
     'plus_minus': 'Plus/Minus',
     'letter_only': 'Letter Only',
     'custom': 'Custom',
     'college_plus_minus': 'College Plus/Minus',
     'percentage': 'Percentage Format'
-    } %}
+} %}
 
-    <div class="grades-list">
-        <h2>Your Grades</h2>
-        <h2>
-            <p>Logged in as: {{ current_user.username }}</p>
-        </h2>
-        {% if gpa is not none %}
-            <div class="gpa-display">
-                <h3>Current GPA: {{ "%.2f"|format(gpa) }}</h3>
-            </div>
-        {% endif %}
-        {% if gpa_scale and grade_format %}
-            <div class="gpa-display">
-                <p><strong>GPA Scale:</strong> {{ scale_names[gpa_scale] if gpa_scale in scale_names else gpa_scale }}</p>
-                <p><strong>Grade Format:</strong> {{ format_names[grade_format] if grade_format in format_names else grade_format }}</p>
-            </div>
-        {% endif %}
-        {% if grades %}
-            <button id="toggleTableSize" class="btn btn-expand mb-2">Expand Table</button>
-            <div class="grades-scroll-container">
-                <table class="table table-striped grades-table">
-                    <thead>
+<div class="grades-list">
+    <h2>Your Grades</h2>
+    <p><strong>Logged in as:</strong> {{ current_user.username }}</p>
+
+    {% if gpa is not none %}
+        <div class="gpa-display">
+            <h3>Current GPA: {{ "%.2f"|format(gpa) }}</h3>
+        </div>
+    {% endif %}
+
+    {% if gpa_scale and grade_format %}
+        <div class="gpa-display">
+            <p><strong>GPA Scale:</strong> {{ scale_names[gpa_scale] if gpa_scale in scale_names else gpa_scale }}</p>
+            <p><strong>Grade Format:</strong> {{ format_names[grade_format] if grade_format in format_names else grade_format }}</p>
+        </div>
+    {% endif %}
+
+    {% if grades %}
+        <button id="toggleTableSize" class="btn btn-expand mb-2">Expand Table</button>
+        <div class="grades-scroll-container">
+            <table class="table table-striped grades-table">
+                <thead>
+                    <tr>
+                        <th><a href="#" class="sort-link" data-sort="subject">Subject</a></th>
+                        <th><a href="#" class="sort-link" data-sort="grade">Grade (Numeric)</a></th>
+                        <th><a href="#" class="sort-link" data-sort="letter">Grade (Letter)</a></th>
+                        <th><a href="#" class="sort-link" data-sort="date">Date</a></th>
+                        <th><a href="#" class="sort-link" data-sort="semester">Semester</a></th>
+                        <th class="actions-header">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for grade in grades %}
                         <tr>
-                            <th>Subject</th>
-                            <th>Grade (Numeric)</th>
-                            <th>Grade (Letter)</th>
-                            <th>Date</th>
-                            <th>Actions</th>
+                            <td data-key="subject">{{ grade.subject }}</td>
+                            <td data-key="grade">{{ "%.2f"|format(grade.grade) }}</td>
+                            <td data-key="letter">{{ grade.letter }}</td>
+                            <td data-key="date">{{ grade.date.strftime('%b %d %Y') if grade.date else '—' }}</td>
+                            <td data-key="semester" data-date="{{ grade.semester.date.strftime('%Y-%m-%d') if grade.semester and grade.semester.date else '' }}">{{ grade.semester.name if grade.semester else '—' }}</td>
+                            <td class="actions-cell">
+                                {% if current_user.is_authenticated %}
+                                    <a href="{{ url_for('main.edit_grade', grade_id=grade.id) }}" class="btn btn-edit">Edit</a>
+                                    <form method="POST" action="{{ url_for('main.delete_grade', grade_id=grade.id) }}" style="display:inline;">
+                                        {{ delete_form.hidden_tag() }}
+                                        <button type="submit" class="btn btn-delete" onclick="return confirm('Are you sure you want to delete this grade?');">Delete</button>
+                                    </form>
+                                {% else %}
+                                    <form method="POST" action="{{ url_for('main.delete_guest_grade', index=loop.index0) }}" style="display:inline;">
+                                        <button type="submit" class="btn btn-delete" onclick="return confirm('Are you sure you want to delete this grade?');" style="margin-right:10px;">Delete</button>
+                                    </form>
+                                    <em style="font-size: 0.9rem; color: #555;">Log in to edit grade</em>
+                                {% endif %}
+                            </td>
                         </tr>
-                    </thead>
-                    <tbody>
-                        {% for grade in grades %}
-                            <tr>
-                                <td>{{ grade.subject }}</td>
-                                <td>{{ "%.2f"|format(grade.grade) }}</td>
-                                <td>{{ grade.letter }}</td>
-                                <td>{{ grade.date.strftime('%b %-d %Y') }}</td>
-                                <td class="actions-cell">
-                                    {% if current_user.is_authenticated %}
-                                        <a href="{{ url_for('main.edit_grade', grade_id=grade.id) }}" class="btn btn-edit">Edit</a>
-                                        <form method="POST" action="{{ url_for('main.delete_grade', grade_id=grade.id) }}" style="display:inline;">
-                                            {{ delete_form.hidden_tag() }}
-                                            <button type="submit" class="btn btn-delete" onclick="return confirm('Are you sure you want to delete this grade?');">Delete</button>
-                                        </form>
-                                    {% else %}
-                                        <form method="POST" action="{{ url_for('main.delete_guest_grade', index=loop.index0) }}" style="display:inline;">
-                                            <button type="submit" class="btn btn-delete" onclick="return confirm('Are you sure you want to delete this grade?');" style="margin-right:10px;">Delete</button>
-                                        </form>
-
-                                        <em style="font-size: 0.9rem; color: #555;">Log in to edit grade</em>
-                                    {% endif %}
-                                </td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            {% if grades|length > 5 %}
-                <p class="scroll-note">Scroll to see more grades...</p>
-            {% endif %}
-        {% else %}
-            <p>No grades yet.</p>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% if grades|length > 5 %}
+            <p class="scroll-note">Scroll to see more grades...</p>
         {% endif %}
+    {% else %}
+        <p>No grades yet.</p>
+    {% endif %}
 
-        <div class="add-grade-link mt-3">
-            <a href="{{ url_for('main.add_grade') }}" class="btn btn-add">Add New Grade</a>
-        </div>
+    <div class="add-grade-link mt-3">
+        <a href="{{ url_for('main.add_grade') }}" class="btn btn-green">Add New Grade</a>
     </div>
+</div>
 
-    <div class="dashboard-flex-container">
-        <a href="{{ url_for('main.trends') }}" class="gpa-link-card">
-            <div class="gpa-trend">
-                <h3>GPA Trend</h3>
-                <div class="graph-container">
-                    <canvas id="gpaTrendChart"></canvas>
-                </div>
-            </div>
-        </a>
-        <div class="right-panel">
-            <div class="simulate-scenarios">
-                <h3>Want to simulate scenarios?</h3>
-                <div class="tooltip-hover-wrapper">
-                    <button class="btn btn-disabled" type="button" disabled>Go to Simulator</button>
-                </div>
-            </div>
-            <div class="export-transcript">
-                <h3>Want to export this into a transcript?</h3>
-                <div class="tooltip-hover-wrapper">
-                    <button class="btn btn-disabled" type="button" disabled>Export Transcript</button>
-                </div>
+<div class="dashboard-flex-container">
+    <a href="{{ url_for('main.trends') }}" class="gpa-link-card">
+        <div class="gpa-trend">
+            <h3>GPA Trend</h3>
+            <div class="graph-container">
+                <canvas id="gpaTrendChart"></canvas>
             </div>
         </div>
+    </a>
+    <div class="right-panel">
+        <div class="simulate-scenarios">
+            <h3>Want to simulate scenarios?</h3>
+            <div class="tooltip-hover-wrapper">
+                <button class="btn btn-disabled" type="button" disabled>Go to Simulator</button>
+            </div>
+        </div>
+        <div class="export-transcript">
+            <h3>Want to export this into a transcript?</h3>
+            <div class="tooltip-hover-wrapper">
+                <button class="btn btn-disabled" type="button" disabled>Export Transcript</button>
+            </div>
+        </div>
     </div>
+</div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const toggleButton = document.getElementById('toggleTableSize');
-            const scrollContainer = document.querySelector('.grades-scroll-container');
+{% if session.get('show_settings_popup') %}
+<!-- Settings Modal -->
+<form id="settingsModalForm" method="POST" action="{{ url_for('main.settings') }}">
+  {{ settings_form.hidden_tag() }}
+  <div id="settingsModal" class="modal" tabindex="-1" style="display:flex; pointer-events:auto;">
+    <div class="modal-dialog" style="pointer-events:auto;">
+      <button type="submit" name="dismiss_settings_popup" value="1" class="close-modal" aria-label="Close" style="background:none; border:none;">&times;</button>
+      <h2 style="margin-bottom:1.2rem;">Welcome! Set Up Your Preferences</h2>
+      <div class="form-group">
+        <label for="gpa_scale">GPA Scale</label>
+        <select name="gpa_scale" id="gpa_scale" class="form-control" required style="pointer-events:auto;">
+          <option value="standard">Standard U.S. 4.0</option>
+          <option value="weighted_5">5.0 Weighted</option>
+          <option value="weighted_4.5">4.5 Weighted</option>
+          <option value="college_plus_minus">College 4.0 +/-</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="grade_format">Grade Format</label>
+        <select name="grade_format" id="grade_format" class="form-control" required style="pointer-events:auto;">
+          <option value="plus_minus">Plus/Minus</option>
+          <option value="simple">Simple</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" id="useCreditHours" name="use_credit_hours">
+          <label class="form-check-label" for="useCreditHours">
+            Use Credit Hours for GPA Calculation
+          </label>
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary" name="save_settings" value="1">Save Settings</button>
+    </div>
+  </div>
+</form>
+{% endif %}
 
-            if (toggleButton && scrollContainer) {
-                toggleButton.addEventListener('click', function() {
-                    scrollContainer.classList.toggle('expanded');
-                    this.textContent = scrollContainer.classList.contains('expanded') ? 'Minimize Table' : 'Expand Table';
-                });
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const toggleButton = document.getElementById('toggleTableSize');
+    const scrollContainer = document.querySelector('.grades-scroll-container');
+
+    if (toggleButton && scrollContainer) {
+        toggleButton.addEventListener('click', function() {
+            scrollContainer.classList.toggle('expanded');
+            this.textContent = scrollContainer.classList.contains('expanded') ? 'Minimize Table' : 'Expand Table';
+        });
+    }
+
+    // Add sorting functionality
+    const sortLinks = document.querySelectorAll('.sort-link');
+    let currentSort = {
+        key: null,
+        ascending: true
+    };
+
+    sortLinks.forEach(function(link) {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const key = this.dataset.sort;
+            const tbody = this.closest('table').querySelector('tbody');
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+            
+            // Toggle sort direction if clicking the same column
+            if (currentSort.key === key) {
+                currentSort.ascending = !currentSort.ascending;
+            } else {
+                currentSort.key = key;
+                currentSort.ascending = true;
             }
 
-            const chartCanvas = document.getElementById('gpaTrendChart');
-            if (chartCanvas) {
-                const ctx = chartCanvas.getContext('2d');
+            // Update sort indicators
+            sortLinks.forEach(l => {
+                l.classList.remove('asc', 'desc');
+                if (l.dataset.sort === key) {
+                    l.classList.add(currentSort.ascending ? 'asc' : 'desc');
+                }
+            });
+            
+            rows.sort(function(a, b) {
+                const aVal = a.querySelector('[data-key="' + key + '"]').textContent;
+                const bVal = b.querySelector('[data-key="' + key + '"]').textContent;
+                
+                let comparison = 0;
+                
+                if (key === 'semester') {
+                    // For semester sorting, get the semester date from the data attribute
+                    const aDate = a.querySelector('[data-key="' + key + '"]').dataset.date;
+                    const bDate = b.querySelector('[data-key="' + key + '"]').dataset.date;
+                    
+                    if (aDate && bDate) {
+                        comparison = new Date(aDate) - new Date(bDate);
+                    } else if (aDate) {
+                        comparison = -1; // Grades with dates come first
+                    } else if (bDate) {
+                        comparison = 1;
+                    } else {
+                        comparison = aVal.localeCompare(bVal); // Fallback to name comparison
+                    }
+                } else if (key === 'date') {
+                    // For date sorting, convert to Date objects
+                    const aDate = new Date(aVal);
+                    const bDate = new Date(bVal);
+                    comparison = aDate - bDate;
+                } else if (key === 'grade') {
+                    // For numeric grade sorting
+                    comparison = parseFloat(aVal) - parseFloat(bVal);
+                } else {
+                    // For text-based sorting (subject and letter)
+                    comparison = aVal.localeCompare(bVal);
+                }
+                
+                // Apply sort direction
+                return currentSort.ascending ? comparison : -comparison;
+            });
+            
+            rows.forEach(function(row) {
+                tbody.appendChild(row);
+            });
+        });
+    });
 
-                const gpaValues = {{ values | tojson }};
-                const maxGPA = Math.max(...gpaValues);
-                const yAxisMax = maxGPA > 4.0 ? Math.ceil(maxGPA * 10) / 10 + 0.2 : 4.0;
+    const chartCanvas = document.getElementById('gpaTrendChart');
+    if (chartCanvas) {
+        const ctx = chartCanvas.getContext('2d');
 
-                const gpaTrendChart = new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: {{ labels | tojson }},
-                        datasets: [{
-                            label: 'Average Grade Trend',
-                            data: gpaValues,
-                            fill: true,
-                            borderColor: '#0a1f44',
-                            backgroundColor: 'rgba(10, 31, 68, 0.1)',
-                            tension: 0.3,
-                            pointRadius: 4,
-                            pointBackgroundColor: '#0a1f44',
-                            borderWidth: 2,
-                            clip: false
-                        }]
+        const gpaValues = {{ values | tojson | safe }};
+        const maxGPA = Math.max.apply(null, gpaValues);
+        const yAxisMax = maxGPA > 4.0 ? Math.ceil(maxGPA * 10) / 10 + 0.2 : 4.0;
+
+        const gpaTrendChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: {{ labels | tojson | safe }},
+                datasets: [{
+                    label: 'Cumulative GPA Trend',
+                    data: gpaValues,
+                    fill: true,
+                    borderColor: '#0a1f44',
+                    backgroundColor: 'rgba(10, 31, 68, 0.1)',
+                    tension: 0.3,
+                    pointRadius: 4,
+                    pointBackgroundColor: '#0a1f44',
+                    borderWidth: 2,
+                    clip: false
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                layout: {
+                    padding: { top: 40, bottom: 10, left: 10, right: 10 }
+                },
+                scales: {
+                    y: {
+                        min: 0,
+                        max: yAxisMax,
+                        ticks: {
+                            stepSize: 0.5,
+                            callback: function(value) {
+                                return value.toFixed(1);
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Cumulative GPA'
+                        }
                     },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        layout: {
-                            padding: {
-                                top: 40,
-                                bottom: 10,
-                                left: 10,
-                                right: 10
-                            }
-                        },
-                        scales: {
-                            y: {
-                                min: 0,
-                                max: yAxisMax,
-                                ticks: {
-                                    stepSize: 0.5,
-                                    callback: val => val.toFixed(1)
-                                },
-                                title: {
-                                    display: true,
-                                    text: 'GPA'
-                                }
-                            },
-                            x: {
-                                title: {
-                                    display: true,
-                                    text: 'Date'
-                                },
-                                ticks: {
-                                    maxRotation: 45,
-                                    minRotation: 30,
-                                    autoSkip: true,
-                                    maxTicksLimit: 10
-                                }
-                            }
-                        },
-                        plugins: {
-                            legend: {
-                                display: false
-                            },
-                            tooltip: {
-                                callbacks: {
-                                    label: function(context) {
-                                        return 'GPA: ' + context.parsed.y.toFixed(2);
-                                    }
-                                }
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Semester'
+                        }
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return 'Cumulative GPA: ' + context.parsed.y.toFixed(2);
                             }
                         }
                     }
-                });
+                }
             }
         });
-    </script>
-
-    <style>
+    }
+});
+</script>
+<style>
     /* Your existing styles here - unchanged */
         .scroll-note {
             font-size: 0.9rem;
@@ -321,12 +421,46 @@
         }
 
         .btn-add {
-            background-color: #28a745;
-            color: white;
+            background-color: #34C759 !important;
+            color: white !important;
+            border: none;
+            border-radius: 14px;
+            font-weight: 700;
+            font-size: 1rem;
+            box-shadow: var(--shadow-sm);
+            padding: 0.6rem 1.3rem;
+            transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
         }
 
-        .btn-add:hover {
-            background-color: #218838;
+        .btn-add:hover, .btn-add:focus {
+            background-color: #28a745 !important;
+            color: white !important;
+            box-shadow: var(--shadow-md);
+            outline: none;
+            text-decoration: none;
+        }
+
+        .btn-green {
+            background: #34C759;
+            color: #fff;
+            border: none;
+            border-radius: 14px;
+            font-weight: 700;
+            font-size: 1rem;
+            box-shadow: var(--shadow-sm);
+            padding: 0.6rem 1.3rem;
+            transition: background-color 0.18s cubic-bezier(.4,2,.6,1),
+                        box-shadow 0.18s cubic-bezier(.4,2,.6,1),
+                        transform 0.18s cubic-bezier(.4,2,.6,1);
+        }
+
+        .btn-green:hover, .btn-green:focus {
+            background: #28a745;
+            color: #fff;
+            box-shadow: var(--shadow-md);
+            outline: none;
+            text-decoration: none;
+            transform: translateY(-1px) scale(1.03);
         }
 
         .btn-expand {
@@ -415,6 +549,122 @@
         .tooltip-hover-wrapper:hover .tooltip-hover-msg {
             visibility: visible;
             opacity: 1;
+        }
+
+        .sort-link {
+            color: #000;
+            font-weight: bold;
+            text-decoration: none;
+            cursor: pointer;
+            position: relative;
+            padding-right: 20px;
+        }
+
+        .sort-link:hover {
+            color: #333;
+        }
+
+        .sort-link.asc::after,
+        .sort-link.desc::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 0;
+            height: 0;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+        }
+
+        .sort-link.asc::after {
+            border-bottom: 5px solid #000;
+        }
+
+        .sort-link.desc::after {
+            border-top: 5px solid #000;
+        }
+
+        .grades-table th,
+        .grades-table .actions-header {
+            color: #000;
+            font-weight: bold;
+            background: #f8f9fa;
+            border-bottom: none;
+        }
+
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1050;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            outline: 0;
+        }
+
+        .modal-dialog {
+            position: relative;
+            margin: 1.75rem auto;
+            pointer-events: none;
+        }
+
+        .modal-content {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            pointer-events: auto;
+            background: #fff;
+            background-clip: padding-box;
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            border-radius: 0.3rem;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-title {
+            margin: 0;
+            font-size: 1.25rem;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .modal-body {
+            padding: 1rem;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            padding: 0.75rem;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 0.5rem 1.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+            text-decoration: none;
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
         }
     </style>
 

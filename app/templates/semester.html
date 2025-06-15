@@ -1,0 +1,303 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="grades-list">
+        <h2>Your Semesters</h2>
+        <p><strong>Logged in as:</strong> {{ current_user.username }}</p>
+
+        <div class="text-end mb-3">
+            <a href="{{ url_for('main.add_semester') }}" class="btn btn-green">Add New Semester</a>
+        </div>
+
+        {% if semesters %}
+            {# Calculate highest and lowest GPAs #}
+            {% set semester_gpas = [] %}
+            {% for semester in semesters %}
+                {% if semester.grades %}
+                    {% set gpa = calculate_gpa(semester.grades) %}
+                    {% set _ = semester_gpas.append((semester.id, gpa)) %}
+                {% endif %}
+            {% endfor %}
+            
+            {% if semester_gpas %}
+                {% set max_gpa = semester_gpas|map(attribute=1)|max %}
+                {% set min_gpa = semester_gpas|map(attribute=1)|min %}
+                {% set max_gpa_ids = [] %}
+                {% set min_gpa_ids = [] %}
+                {% for id, gpa in semester_gpas %}
+                    {% if gpa == max_gpa %}
+                        {% set _ = max_gpa_ids.append(id) %}
+                    {% endif %}
+                    {% if gpa == min_gpa %}
+                        {% set _ = min_gpa_ids.append(id) %}
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+
+            <div class="semesters-container">
+                {% for semester in semesters %}
+                <div class="semester-card">
+                    <div class="semester-header">
+                        <h3>{{ semester.name }}</h3>
+                        <div class="semester-info">
+                            <span class="date">Started: {{ semester.start_date.strftime('%b %d %Y') if semester.start_date else 'No date' }}</span>
+                            <span class="grade-count">{{ semester.grades|length }} Grades</span>
+                            {% if semester.grades %}
+                            <span class="gpa-display {% if semester.id in max_gpa_ids %}highest-gpa{% elif semester.id in min_gpa_ids %}lowest-gpa{% endif %}">
+                                GPA: {{ "%.2f"|format(calculate_gpa(semester.grades)) }}
+                            </span>
+                            {% endif %}
+                        </div>
+                        <div class="semester-actions">
+                            <a href="{{ url_for('main.edit_semester', semester_id=semester.id) }}" class="btn btn-edit">Edit</a>
+                            <form method="POST" action="{{ url_for('main.delete_semester', semester_id=semester.id) }}" style="display:inline;">
+                                {{ form.hidden_tag() }}
+                                <button type="submit" class="btn btn-delete" onclick="return confirm('Are you sure you want to delete this semester? This will also delete all grades in this semester.');">Delete</button>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    {% if semester.grades %}
+                    <div class="grades-scroll-container">
+                        <table class="table table-striped grades-table">
+                            <thead>
+                                <tr>
+                                    <th><a href="#" class="sort-link" data-sort="subject">Subject</a></th>
+                                    <th><a href="#" class="sort-link" data-sort="grade">Grade</a></th>
+                                    <th><a href="#" class="sort-link" data-sort="letter">Letter</a></th>
+                                    <th><a href="#" class="sort-link" data-sort="type">Course Type</a></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for grade in semester.grades %}
+                                <tr>
+                                    <td data-key="subject">{{ grade.subject }}</td>
+                                    <td data-key="grade">{{ "%.2f"|format(grade.grade) }}</td>
+                                    <td data-key="letter">{{ grade.letter }}</td>
+                                    <td data-key="type">{{ grade.course_type }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="no-grades">
+                        <p>No grades in this semester yet.</p>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-center">No semesters found. Click "Add New Semester" to create one.</p>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Add sorting functionality
+    const sortLinks = document.querySelectorAll('.sort-link');
+    sortLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const key = this.dataset.sort;
+            const tbody = this.closest('table').querySelector('tbody');
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+            
+            rows.sort((a, b) => {
+                const aVal = a.querySelector(`[data-key="${key}"]`).textContent;
+                const bVal = b.querySelector(`[data-key="${key}"]`).textContent;
+                return aVal.localeCompare(bVal);
+            });
+            
+            rows.forEach(row => tbody.appendChild(row));
+        });
+    });
+});
+</script>
+
+<style>
+    .grades-list {
+        background: #fff;
+        padding: 2rem;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .semesters-container {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .semester-card {
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+
+    .semester-header {
+        background: #f8f9fa;
+        padding: 1rem;
+        border-bottom: 1px solid #dee2e6;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .semester-header h3 {
+        margin: 0;
+        color: #0a1f44;
+        font-size: 1.25rem;
+    }
+
+    .semester-info {
+        display: flex;
+        gap: 1rem;
+        color: #6c757d;
+        font-size: 0.9rem;
+        align-items: center;
+    }
+
+    .semester-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .grades-scroll-container {
+        max-height: 300px;
+        overflow-y: auto;
+        transition: max-height 0.4s ease;
+    }
+
+    .grades-table {
+        width: 100%;
+        margin-bottom: 0;
+        background-color: transparent;
+    }
+
+    .grades-table th {
+        color: #000;
+        font-weight: bold;
+        background: #f8f9fa;
+        border-bottom: none;
+        position: sticky;
+        top: 0;
+        z-index: 1;
+    }
+
+    .grades-table td {
+        vertical-align: middle;
+    }
+
+    .sort-link {
+        color: #000;
+        font-weight: bold;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .sort-link:hover {
+        color: #333;
+    }
+
+    .btn {
+        padding: 0.4rem 1rem;
+        font-size: 0.95rem;
+        border-radius: 6px;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        text-decoration: none;
+        transition: background-color 0.3s ease;
+    }
+
+    .btn-edit {
+        background-color: #0a1f44;
+        color: white;
+    }
+
+    .btn-edit:hover {
+        background-color: #071632;
+    }
+
+    .btn-delete {
+        background-color: #dc3545;
+        color: white;
+    }
+
+    .btn-delete:hover {
+        background-color: #c82333;
+    }
+
+    .btn-green {
+        background: #34C759;
+        color: #fff;
+        border: none;
+        border-radius: 14px;
+        font-weight: 700;
+        font-size: 1rem;
+        box-shadow: var(--shadow-sm);
+        padding: 0.6rem 1.3rem;
+        transition: background-color 0.18s cubic-bezier(.4,2,.6,1),
+                    box-shadow 0.18s cubic-bezier(.4,2,.6,1),
+                    transform 0.18s cubic-bezier(.4,2,.6,1);
+    }
+
+    .btn-green:hover, .btn-green:focus {
+        background: #28a745;
+        color: #fff;
+        box-shadow: var(--shadow-md);
+        outline: none;
+        text-decoration: none;
+        transform: translateY(-1px) scale(1.03);
+    }
+
+    .no-grades {
+        padding: 2rem;
+        text-align: center;
+        color: #6c757d;
+        font-style: italic;
+    }
+
+    .table-striped tbody tr:nth-of-type(odd) {
+        background-color: rgba(0, 0, 0, 0.02);
+    }
+
+    .table-striped tbody tr:hover {
+        background-color: rgba(0, 0, 0, 0.04);
+    }
+
+    .date, .grade-count, .gpa-display {
+        display: inline-block;
+        padding: 0.25rem 0.5rem;
+        background: #e9ecef;
+        border-radius: 4px;
+    }
+
+    .gpa-display {
+        background: #eef1fb;
+        color: #0a1f44;
+        font-weight: 600;
+        padding: 0.25rem 0.75rem;
+        border-radius: 4px;
+        border: 2px solid transparent;
+        transition: all 0.3s ease;
+    }
+
+    .highest-gpa {
+        border-color: #34C759;
+        background: #e8f7ed;
+    }
+
+    .lowest-gpa {
+        border-color: #dc3545;
+        background: #fde8e8;
+    }
+</style>
+{% endblock %}
