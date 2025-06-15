@@ -1,43 +1,43 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
-        <loc>/</loc>
+        <loc>https://gradepilotgpa.com/</loc>
         <lastmod>2024-03-19</lastmod>
         <changefreq>daily</changefreq>
         <priority>1.0</priority>
     </url>
     <url>
-        <loc>/add</loc>
+        <loc>https://gradepilotgpa.com/add</loc>
         <lastmod>2024-03-19</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.9</priority>
     </url>
     <url>
-        <loc>/trends</loc>
+        <loc>https://gradepilotgpa.com/trends</loc>
         <lastmod>2024-03-19</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
-        <loc>/semesters</loc>
+        <loc>https://gradepilotgpa.com/semesters</loc>
         <lastmod>2024-03-19</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
-        <loc>/settings</loc>
+        <loc>https://gradepilotgpa.com/settings</loc>
         <lastmod>2024-03-19</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
     </url>
     <url>
-        <loc>/login</loc>
+        <loc>https://gradepilotgpa.com/login</loc>
         <lastmod>2024-03-19</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.6</priority>
     </url>
     <url>
-        <loc>/signup</loc>
+        <loc>https://gradepilotgpa.com/signup</loc>
         <lastmod>2024-03-19</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.6</priority>
