@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, request, flash, session, current_app, jsonify
+from flask import Blueprint, render_template, redirect, url_for, request, flash, session, current_app, jsonify, send_from_directory
 from flask_login import login_user, logout_user, login_required, current_user
 from app import db, csrf, is_admin
 from app.models import User, Grade, CustomGPA, UserSettings, Semester, UserActivity
@@ -927,7 +927,8 @@ def semesters():
         semesters=semesters,
         request=request,
         calculate_gpa=calculate_gpa,  # Pass the calculate_gpa function to the template
-        form=form  # Pass the form to the template
+        form=form,  # Pass the form to the template
+        grade_format=current_user.grade_format  # Pass the user's grade format
     )
 
 @main.route('/add_semester', methods=['GET', 'POST'])
@@ -1002,3 +1003,7 @@ def track_activity():
             user_agent=request.user_agent.string,
             details={'path': request.path}
         )
+
+@main.route('/sitemap.xml')
+def sitemap():
+    return send_from_directory('templates', 'sitemap.xml', mimetype='application/xml')
